@@ -1,6 +1,7 @@
 package ru.netology.nmedia.viewmodel
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -9,8 +10,6 @@ import ru.netology.nmedia.model.FeedModel
 import ru.netology.nmedia.repository.PostRepository
 import ru.netology.nmedia.repository.PostRepositoryImpl
 import ru.netology.nmedia.util.SingleLiveEvent
-import java.io.IOException
-import kotlin.concurrent.thread
 
 private val empty = Post(
     id = 0,
@@ -37,28 +36,49 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun loadPosts() {
-        thread {
-            // Начинаем загрузку
-            _data.postValue(FeedModel(loading = true))
-            try {
-                // Данные успешно получены
-                val posts = repository.getAll()
-                FeedModel(posts = posts, empty = posts.isEmpty())
-            } catch (e: IOException) {
-                // Получена ошибка
-                FeedModel(error = true)
-            }.also(_data::postValue)
-        }
+        _data.value = FeedModel(loading = true)
+        repository.getAllAsync(object : PostRepository.Callback<List<Post>> {
+            override fun onSuccess(value: List<Post>) {
+                _data.postValue(FeedModel(posts = value, empty = value.isEmpty()))
+            }
+
+            override fun onError(e: Exception) {
+                _data.postValue(FeedModel(error = true))
+            }
+        })
     }
 
     fun save() {
         edited.value?.let {
-            thread {
-                repository.save(it)
-                _postCreated.postValue(Unit)
-            }
+            repository.saveAsync(it, object : PostRepository.Callback<Post> {
+                override fun onSuccess(value: Post) {
+                    _postCreated.postValue(Unit)
+                }
+
+                override fun onError(e: Exception) {
+                    Log.e("Error", "post ${it.id} couldn't be saved: $e")
+                }
+            })
         }
         edited.value = empty
+    }
+
+    fun removeById(id: Long) {
+        repository.removeByIdAsync(id, object : PostRepository.Callback<Unit> {
+            val old = _data.value?.posts.orEmpty()
+            override fun onSuccess(value: Unit) {
+                _data.postValue(
+                    _data.value?.copy(posts = _data.value?.posts.orEmpty()
+                        .filter { it.id != id }
+                    )
+                )
+            }
+
+            override fun onError(e: Exception) {
+                _data.postValue(_data.value?.copy(posts = old))
+            }
+
+        })
     }
 
     fun edit(post: Post) {
@@ -74,46 +94,44 @@ class PostViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun likeById(id: Long) {
-        thread {
-            val likedPost = repository.likeById(id)
-            _data.postValue(
-                _data.value?.copy(posts = _data.value?.posts.orEmpty()
-                    .map {
-                        if (it.id == id) likedPost else it
-                    }
+        repository.likeByIdAsync(id, object : PostRepository.Callback<Post> {
+            override fun onSuccess(value: Post) {
+                _data.postValue(
+                    _data.value?.copy(
+                        posts = _data.value?.posts.orEmpty()
+                            .map {
+                                if (it.id == id) value else it
+                            }
+                    )
                 )
-            )
-        }
+
+            }
+
+            override fun onError(e: Exception) {
+                Log.e("Error", "post $id couldn't be liked: $e")
+            }
+        })
     }
+
 
     fun unlikeById(id: Long) {
-        thread {
-            val unlikedPost = repository.unlikeById(id)
-            _data.postValue(
-                _data.value?.copy(
-                    posts = _data.value?.posts.orEmpty()
-                        .map {
-                            if (it.id == id) unlikedPost else it
-                    }
+        repository.unlikeByIdAsync(id, object : PostRepository.Callback<Post> {
+            override fun onSuccess(value: Post) {
+                _data.postValue(
+                    _data.value?.copy(
+                        posts = _data.value?.posts.orEmpty()
+                            .map {
+                                if (it.id == id) value else it
+                            }
+                    )
                 )
-            )
-        }
-    }
-
-    fun removeById(id: Long) {
-        thread {
-            // Оптимистичная модель
-            val old = _data.value?.posts.orEmpty()
-            _data.postValue(
-                _data.value?.copy(posts = _data.value?.posts.orEmpty()
-                    .filter { it.id != id }
-                )
-            )
-            try {
-                repository.removeById(id)
-            } catch (e: IOException) {
-                _data.postValue(_data.value?.copy(posts = old))
             }
-        }
+
+
+            override fun onError(e: Exception) {
+                Log.e("Error", "post $id couldn't be unliked: $e")
+            }
+        })
     }
 }
+
