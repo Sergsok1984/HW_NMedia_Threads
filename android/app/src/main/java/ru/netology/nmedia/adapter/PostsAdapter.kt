@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import ru.netology.nmedia.BuildConfig
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.CardPostBinding
 import ru.netology.nmedia.dto.Post
@@ -74,7 +75,7 @@ class PostViewHolder(
                 onInteractionListener.onShare(post)
             }
 
-            val avatarUrl = "http://10.0.2.2:9999/avatars/${post.authorAvatar}"
+            val avatarUrl = "${BuildConfig.BASE_URL}/avatars/${post.authorAvatar}"
 
             Glide.with(binding.avatar)
                 .load(avatarUrl)
@@ -85,7 +86,7 @@ class PostViewHolder(
             if (post.attachment == null) {
                 attachment.visibility = View.GONE
             } else {
-                val attachmentUrl = "http://10.0.2.2:9999/images/${post.attachment.url}"
+                val attachmentUrl = "${BuildConfig.BASE_URL}/images/${post.attachment.url}"
                 Glide.with(binding.attachment)
                     .load(attachmentUrl)
                     .timeout(10_000)
