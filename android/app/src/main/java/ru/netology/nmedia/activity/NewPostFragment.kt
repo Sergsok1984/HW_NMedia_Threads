@@ -98,6 +98,11 @@ class NewPostFragment : Fragment() {
                         true
                     }
 
+                    R.id.logout -> {
+                        SignOutFragment().show(childFragmentManager, "logoutDialog")
+                        true
+                    }
+
                     else -> false
                 }
             }

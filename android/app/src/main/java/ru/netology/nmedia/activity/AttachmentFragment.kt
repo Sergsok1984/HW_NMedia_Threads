@@ -26,11 +26,9 @@ class AttachmentFragment : Fragment() {
             false
         )
         val url = arguments?.textArg
-        val attachmentUrl = "${BuildConfig.BASE_URL}/images/${url}"
-        val attachmentUrlNew = "${BuildConfig.BASE_URL}/media/${url}"
+        val attachmentUrl= "${BuildConfig.BASE_URL}/media/${url}"
         Glide.with(binding.attachmentFullscreen)
             .load(attachmentUrl)
-            .load(attachmentUrlNew)
             .timeout(10_000)
             .into(binding.attachmentFullscreen)
 
