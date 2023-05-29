@@ -14,8 +14,9 @@ import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.auth.AuthState
 import ru.netology.nmedia.dto.Media
 import ru.netology.nmedia.dto.Post
+import ru.netology.nmedia.dto.PushToken
 
-interface PostsApiService {
+interface ApiService {
 
     @GET("posts")
     suspend fun getAll(): Response<List<Post>>
@@ -34,6 +35,9 @@ interface PostsApiService {
 
     @DELETE("posts/{postId}/likes")
     suspend fun unlikeById(@Path("postId") id: Long): Response<Post>
+
+    @POST("users/push-tokens")
+    suspend fun sendPushToken(@Body token: PushToken): Response<Unit>
 
     @Multipart
     @POST("media")
@@ -64,7 +68,7 @@ interface PostsApiService {
     ): Response<AuthState>
 }
 
-object PostsApi {
+object Api {
 
     private const val BASE_URL = "${BuildConfig.BASE_URL}/api/slow/"
 
@@ -77,10 +81,10 @@ object PostsApi {
     private val client = OkHttpClient.Builder()
         .addInterceptor(logging)
         .addInterceptor { chain ->
-            val request = AppAuth.getInstance().state.value?.token?.let {
+            val request = AppAuth.getInstance().state.value?.token?.let { token ->
                 chain.request()
                     .newBuilder()
-                    .addHeader("Authorization", it)
+                    .addHeader("Authorization", token)
                     .build()
             } ?: chain.request()
 
@@ -95,6 +99,6 @@ object PostsApi {
         .build()
 
     val retrofitService by lazy {
-        retrofit.create<PostsApiService>()
+        retrofit.create<ApiService>()
     }
 }

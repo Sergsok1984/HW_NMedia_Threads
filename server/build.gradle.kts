@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     id("org.springframework.boot") version "3.0.5"
-    id("io.spring.dependency-management") version "1.0.11.RELEASE"
+    id("io.spring.dependency-management") version "1.1.0"
     id("org.jetbrains.kotlin.plugin.jpa") version "1.8.10"
     kotlin("jvm") version "1.8.10"
     kotlin("plugin.spring") version "1.8.10"
@@ -27,6 +27,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     
     implementation("org.apache.tika:tika-core:2.7.0")
+    implementation("com.google.firebase:firebase-admin:9.1.1")
     runtimeOnly("com.h2database:h2")
     implementation("org.bouncycastle:bctls-jdk15on:1.70")
     testImplementation("org.springframework.boot:spring-boot-starter-test") {
