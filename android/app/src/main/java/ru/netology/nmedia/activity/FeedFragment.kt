@@ -167,6 +167,7 @@ class FeedFragment : Fragment() {
                         SignUpFragment().show(childFragmentManager, "signUpDialog")
                         true
                     }
+
                     else -> false
                 }
         }.apply {
@@ -175,12 +176,13 @@ class FeedFragment : Fragment() {
 
         authViewModel.state.observe(viewLifecycleOwner) {
             requireActivity().invalidateOptionsMenu()
+        }
+        return binding.root
     }
-    return binding.root
-}
 
-private fun unauthorizedAccessAttempt() {
-    Toast.makeText(context, R.string.sign_in_to_continue, Toast.LENGTH_LONG).show()
-    SignInFragment().show(childFragmentManager, "authDialog")
-}
+
+    private fun unauthorizedAccessAttempt() {
+        Toast.makeText(context, R.string.sign_in_to_continue, Toast.LENGTH_LONG).show()
+        SignInFragment().show(childFragmentManager, "authDialog")
+    }
 }
