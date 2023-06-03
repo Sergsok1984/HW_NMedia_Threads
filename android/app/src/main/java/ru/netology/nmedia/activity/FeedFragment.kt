@@ -53,7 +53,6 @@ class FeedFragment : Fragment() {
                             false -> viewModel.likeById(post.id)
                         }
                     }
-
                     false -> unauthorizedAccessAttempt()
                 }
             }
