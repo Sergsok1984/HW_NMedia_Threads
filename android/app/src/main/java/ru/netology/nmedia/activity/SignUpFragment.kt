@@ -15,13 +15,14 @@ import androidx.fragment.app.viewModels
 import com.github.dhaval2404.imagepicker.ImagePicker
 import com.github.dhaval2404.imagepicker.constant.ImageProvider
 import com.google.android.material.snackbar.Snackbar
+import dagger.hilt.android.AndroidEntryPoint
 import ru.netology.nmedia.R
 import ru.netology.nmedia.databinding.FragmentSignUpBinding
 import ru.netology.nmedia.error.ApiException
 import ru.netology.nmedia.viewmodel.AuthViewModel
 
+@AndroidEntryPoint
 class SignUpFragment : DialogFragment() {
-
     private val authViewModel: AuthViewModel by viewModels()
 
     override fun onCreateView(
@@ -41,6 +42,7 @@ class SignUpFragment : DialogFragment() {
                         ImagePicker.getError(it.data),
                         Snackbar.LENGTH_LONG
                     ).show()
+
                     Activity.RESULT_OK -> {
                         val uri: Uri? = it.data?.data
                         authViewModel.changePhoto(uri, uri?.toFile())
@@ -102,6 +104,7 @@ class SignUpFragment : DialogFragment() {
                         binding.password.text.toString(),
                         binding.username.text.toString()
                     )
+
                     else -> authViewModel.photo.value?.file?.let { file ->
                         authViewModel.registerWithPhoto(
                             binding.login.text.toString(),

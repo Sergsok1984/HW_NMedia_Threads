@@ -2,16 +2,21 @@ package ru.netology.nmedia.viewmodel
 
 import android.net.Uri
 import androidx.lifecycle.*
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import ru.netology.nmedia.auth.AppAuth
 import ru.netology.nmedia.dto.PhotoModel
 import ru.netology.nmedia.error.AppError
 import ru.netology.nmedia.util.SingleLiveEvent
 import java.io.File
+import javax.inject.Inject
 
 
-class AuthViewModel : ViewModel() {
-    val state = AppAuth.getInstance().state
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val appAuth: AppAuth
+): ViewModel() {
+    val state = appAuth.state
         .asLiveData()
     val authorized: Boolean
         get() = state.value != null
@@ -31,7 +36,7 @@ class AuthViewModel : ViewModel() {
     fun updateUser(login: String, password: String) =
         viewModelScope.launch {
             try {
-                AppAuth.getInstance().update(login, password)
+                appAuth.update(login, password)
             } catch (e: Exception) {
                 _error.value = e
             }
@@ -39,7 +44,7 @@ class AuthViewModel : ViewModel() {
 
     fun registerUser(login: String, password: String, name: String) = viewModelScope.launch {
         try {
-            AppAuth.getInstance().register(login, password, name)
+            appAuth.register(login, password, name)
         } catch (e: Exception) {
             _error.value = e
         }
@@ -48,7 +53,7 @@ class AuthViewModel : ViewModel() {
     fun registerWithPhoto(login: String, password: String, name: String, file: File) =
         viewModelScope.launch {
             try {
-                AppAuth.getInstance().registerWithPhoto(login, password, name, file)
+                appAuth.registerWithPhoto(login, password, name, file)
             } catch (e: Exception) {
                 println(e)
                 throw AppError.from(e)
